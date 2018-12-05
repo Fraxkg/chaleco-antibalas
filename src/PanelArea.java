@@ -15,6 +15,7 @@ public class PanelArea extends JPanel{
 	MySQLConnect data;
 	ResultSet registros=null;
 	ResultSet registrosHospital=null;
+	ResultSet registrosIdHospital=null;
 	String nombreViejo;
 
 	//
@@ -87,17 +88,12 @@ public class PanelArea extends JPanel{
 				int comp2;
 				String comp1;
 				//este while de registros obtiene el id del del hospital que seleccione
-				System.out.println(hospitalElegido);
+				registrosIdHospital=(ResultSet)data.getQuery("SELECT * FROM hospital where nombre= '"+hospitalElegido+"';");
 				try {
-					while(registrosHospital.next()) {
+					while(registrosIdHospital.next()) {
 						comp2=registros.getInt("idHospital");
-						comp1=registros.getString("nombre");
-						System.out.println(comp2 + comp1);
-						if(hospitalElegido.equals(comp1)) {
-							
-							
-							idHospital=comp2;
-						}
+						idHospital=comp2;
+						
 						
 					}
 				} catch (SQLException e1) {
