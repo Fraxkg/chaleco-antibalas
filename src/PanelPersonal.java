@@ -1,10 +1,12 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -16,12 +18,18 @@ public class PanelPersonal extends JPanel{
 	 //bASE DE DATOS
 	 MySQLConnect data;
 	 ResultSet registros=null;
+	 ResultSet registrosSexo=null;
+	 ResultSet registrosPuesto=null;
 	ResultSet registrosHospital=null;
 	String nombreViejo;
 	String aPaternoViejo;
 	String aMaternoViejo;
 	String direccionViejo;
-	
+	String telefonoViejo;
+	String sexoViejo;
+	String PuestoViejo;
+	String AreaViejo;
+	int idHospital=0;
 	//Controles Agergar
 	private JLabel lblAgregar,lblNombre, lblAp, lblAm, lblDireccion, lblTel, lblFechaNac, lblSexo, lblPuesto, lblArea;
 	private JTextField txtNombre, txtAp, txtAm, txtDireccion, txtTel, txtFechaNac;
@@ -32,7 +40,7 @@ public class PanelPersonal extends JPanel{
 	private JLabel lblEditar, lblSeleccionarEd,lblEdNombre, lblEdAp, lblEdAm, lblEdDireccion, lblEdTel, lblEdFechaNac, lblEdSexo, lblEdPuesto, lblEdArea;
 	private JTextField txtEdNombre, txtEdAp, txtEdAm, txtEdDireccion, txtEdTel, txtEdFechaNac;
 	private JComboBox<String> cbEdSexo, cbEditar, cbEdPuesto, cbEdArea;
-	private JButton btnEditar, btnGuardarEdicion, btnCancelarEdicion;
+	private JButton btnEditar, btnGuardarEdicion, btnCancelarEdicion, btnSelHospital;
 	
 	//Controles Eliminar
 	private JLabel lblEliminar, lblSeleccionarEl;
@@ -46,6 +54,9 @@ public class PanelPersonal extends JPanel{
 		this.setSize(1200,700);
 		
 		//AGREGAR PERSONAL
+		data= new MySQLConnect();
+		data.MySQLConnect();
+		registrosHospital=(ResultSet) data.getQuery("Select * from Hospital");
 		
 		lblSelectHospital = new JLabel("Seleccionar hospital:");
 		lblSelectHospital.setBounds(10,posY,150,30);
@@ -53,7 +64,72 @@ public class PanelPersonal extends JPanel{
 		cbHospital = new JComboBox<>();
 		cbHospital.setBounds(150, posY, 300,30);
 		cbHospital.addItem("Seleccionar Hospital --");
+
+		try {
+			while(registrosHospital.next()) {
+				cbHospital.addItem(registrosHospital.getString("nombre"));
+				
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
+		btnSelHospital = new JButton("Seleccionar");
+		btnSelHospital.setBounds(460,10,120,30);
+		btnSelHospital.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String HospitalSel=(String) cbHospital.getSelectedItem();
+				ResultSet registrosIdHospital=(ResultSet)data.getQuery("SELECT * FROM hospital where nombre= '"+HospitalSel+"';");
+				try {
+					while(registrosIdHospital.next()) {
+					
+						idHospital=registrosIdHospital.getInt("idHospital");
+						
+						
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				cbEditar.removeAllItems();
+				cbEliminar.removeAllItems();
+				cbEditar.addItem("Seleccione un Personal...");
+				cbEliminar.addItem("Seleccione un Personal...");
+				cbEdArea.removeAllItems();
+				cbArea.removeAllItems();
+				cbEdArea.addItem("Seleccione un area...");
+				cbArea.addItem("Seleccione un area...");
+				System.out.println(idHospital);
+				ResultSet Concuerda=(ResultSet)data.getQuery("SELECT * FROM Personal where idHospital= '"+idHospital+"';");
+				
+				try {
+					while(Concuerda.next()) {
+						System.out.println("sin entro");
+						cbEditar.addItem(Concuerda.getString("nombre"));
+						cbEliminar.addItem(Concuerda.getString("nombre"));
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ResultSet ConcuerdaArea=(ResultSet)data.getQuery("SELECT * FROM _Area where idHospital= '"+idHospital+"';");
+				
+				try {
+					while(ConcuerdaArea.next()) {
+						System.out.println("sin entro");
+						cbArea.addItem(ConcuerdaArea.getString("nombre"));
+						cbEdArea.addItem(ConcuerdaArea.getString("nombre"));
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		posY+=40;		
 		
 		lblAgregar = new JLabel("Agregar");
@@ -363,14 +439,59 @@ public class PanelPersonal extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
+				if(cbEliminar.getSelectedIndex()!=0) {
+					String eliminar=((String) cbEliminar.getSelectedItem());
+					System.out.println(eliminar);
+					data.setQuery("DELETE FROM Personal WHERE nombre='"+eliminar+"'");
+					cbEliminar.removeAllItems();
+					cbEditar.removeAllItems();
+					cbEliminar.addItem("Seleccione personal...");
+					cbEditar.addItem("Seleccione personal...");
+					JOptionPane.showMessageDialog(btnEliminar,"Eliminación exitosa");
+					registros=(ResultSet) data.getQuery("Select * from Personal where idHospital='"+idHospital+"';");
+					try {
+						while(registros.next()) {
+							
+							cbEliminar.addItem(registros.getString("nombre"));
+							cbEditar.addItem(registros.getString("nombre"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					}else {
+						
+					}
 			}
 		});
+		registrosSexo=(ResultSet)data.getQuery("SELECT * FROM Sexo;");
 		
+		try {
+			while(registrosSexo.next()) {
+				System.out.println("sin entro");
+				cbSexo.addItem(registrosSexo.getString("nombre"));
+				cbEdSexo.addItem(registrosSexo.getString("nombre"));
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	registrosPuesto=(ResultSet)data.getQuery("SELECT * FROM TipoPuesto;");
+		
+		try {
+			while(registrosPuesto.next()) {
+				System.out.println("sin entro");
+				cbPuesto.addItem(registrosPuesto.getString("puesto"));
+				cbEdPuesto.addItem(registrosPuesto.getString("puesto"));
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		this.add(lblEliminar);
 		this.add(lblSeleccionarEl);
 		this.add(cbEliminar);
 		this.add(btnEliminar);
-		
+		this.add(btnSelHospital);
 	}
 }

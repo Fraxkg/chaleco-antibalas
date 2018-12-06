@@ -17,13 +17,14 @@ public class PanelArea extends JPanel{
 	ResultSet registrosHospital=null;
 	ResultSet registrosIdHospital=null;
 	String nombreViejo;
+	int idHospital=0;
 
 	//
 	private int posY=10;
 	 private JComboBox<String> cbHospital;
 	 private JLabel lblSelectHospital;
 
-	private JButton btnAgregar,btnCancelar, btnEditar, btnGuardarE, btnEliminar;
+	private JButton btnAgregar,btnCancelar, btnEditar, btnGuardarE, btnEliminar, btnSelHospital;
 	private JTextField txtNombre, txtENombre;
 	private JLabel lblNombre, lblSeleccionarEd, lblENombre, lblAgregar, lblEditar, lblSeleccionarEl, lblEliminar;
 	private JComboBox<String> cbEdArea, cbElArea;
@@ -43,6 +44,7 @@ public class PanelArea extends JPanel{
 		cbHospital = new JComboBox<>();
 		cbHospital.setBounds(150, posY, 300,30);
 		cbHospital.addItem("Seleccionar hospital --");
+		
 		try {
 			while(registrosHospital.next()) {
 				cbHospital.addItem(registrosHospital.getString("nombre"));
@@ -53,7 +55,46 @@ public class PanelArea extends JPanel{
 			e1.printStackTrace();
 		}
 		posY+=40;
-		
+		btnSelHospital = new JButton("Seleccionar");
+		btnSelHospital.setBounds(480,10,150,30);
+		btnSelHospital.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String HospitalSel=(String) cbHospital.getSelectedItem();
+				ResultSet registrosIdHospital=(ResultSet)data.getQuery("SELECT * FROM hospital where nombre= '"+HospitalSel+"';");
+				try {
+					while(registrosIdHospital.next()) {
+					
+						idHospital=registrosIdHospital.getInt("idHospital");
+						
+						
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				cbElArea.removeAllItems();
+				cbEdArea.removeAllItems();
+				cbElArea.addItem("Seleccione un Area...");
+				cbEdArea.addItem("Seleccione un Area...");
+				System.out.println(idHospital);
+				ResultSet Concuerda=(ResultSet)data.getQuery("SELECT * FROM _Area where idHospital= '"+idHospital+"';");
+				
+				try {
+					while(Concuerda.next()) {
+						System.out.println("sin entro");
+						cbElArea.addItem(Concuerda.getString("nombre"));
+						cbEdArea.addItem(Concuerda.getString("nombre"));
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		//AGREGAR area
 		lblAgregar =  new JLabel("Agregar Área");
 		lblAgregar.setBounds(10,posY,200,30);
@@ -83,7 +124,7 @@ public class PanelArea extends JPanel{
 				//guardo la opcion del hospital elegido en una varibale
 				String hospitalElegido=(String) cbHospital.getSelectedItem();
 				//inicializo el id del hospital que se agregará a area
-				int idHospital=0;
+				
 				
 				int comp2;
 				String comp1;
@@ -122,7 +163,7 @@ public class PanelArea extends JPanel{
 				//aqui se valida que si el campo no esta vacio y no esta repetido insertara la informacion moxxita
 				if(txtNombre.getText().isEmpty()!=true && flagRepetido==false) {
 					System.out.println(idHospital);
-				data.setQuery("INSERT INTO _Area (idArea, nombre, idHospital) VALUES (NULL, '"+area+"',16);");
+				data.setQuery("INSERT INTO _Area (idArea, nombre, idHospital) VALUES (NULL, '"+area+"','"+idHospital+"');");
 				JOptionPane.showMessageDialog(btnAgregar,"Registro de Area exitoso");
 				
 			}else {
@@ -132,10 +173,7 @@ public class PanelArea extends JPanel{
 				JOptionPane.showMessageDialog(btnAgregar,"Esta area ya está registrado");}
 			}
 
-			private int getValueOf(String idHospital) {
-				// TODO Auto-generated method stub
-				return 0;
-			}
+			
 		});
 		
 		btnCancelar = new JButton("Cancelar");
@@ -179,6 +217,14 @@ public class PanelArea extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				if(cbEdArea.getSelectedIndex()!=0) {
+					txtENombre.setText((String) cbEdArea.getSelectedItem());
+					nombreViejo=(String) cbEdArea.getSelectedItem();
+					System.out.println(cbEdArea.getSelectedItem());
+					txtENombre.repaint();
+					}else {
+						
+					}
 				
 			}
 		});
@@ -198,7 +244,33 @@ public class PanelArea extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				String nombreNuevo=txtENombre.getText();
+				System.out.println(nombreNuevo);
 				
+				if(cbEdArea.getSelectedIndex()!=0) {
+					data.setQuery("UPDATE _Area SET nombre = '"+nombreNuevo+"' WHERE nombre='"+nombreViejo+"'");
+					
+					txtENombre.setText("");
+					JOptionPane.showMessageDialog(btnGuardarE,"Edición exitosa");
+					cbElArea.removeAllItems();
+					cbEdArea.removeAllItems();
+					cbElArea.addItem("Seleccione un area...");
+					cbEdArea.addItem("Seleccione un area...");
+					ResultSet registrosArea=(ResultSet)data.getQuery("SELECT * FROM _Area where idHospital= '"+idHospital+"';");
+					
+					try {
+						while(registrosArea.next()) {
+							
+							cbElArea.addItem(registrosArea.getString("nombre"));
+							cbEdArea.addItem(registrosArea.getString("nombre"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					}else {
+						
+					}
 			}
 		});
 		
@@ -233,7 +305,29 @@ public class PanelArea extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
+				if(cbElArea.getSelectedIndex()!=0) {
+					String eliminar=((String) cbElArea.getSelectedItem());
+					System.out.println(eliminar);
+					data.setQuery("DELETE FROM _Area WHERE nombre='"+eliminar+"'");
+					cbElArea.removeAllItems();
+					cbEdArea.removeAllItems();
+					cbElArea.addItem("Seleccione un Area...");
+					cbEdArea.addItem("Seleccione un Area...");
+					JOptionPane.showMessageDialog(btnEliminar,"Eliminación exitosa");
+					registros=(ResultSet) data.getQuery("Select * from _Area where idHospital='"+idHospital+"';");
+					try {
+						while(registros.next()) {
+							
+							cbElArea.addItem(registros.getString("nombre"));
+							cbEdArea.addItem(registros.getString("nombre"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					}else {
+						
+					}
 			}
 		});
 		
@@ -241,5 +335,6 @@ public class PanelArea extends JPanel{
 		this.add(lblSeleccionarEl);
 		this.add(cbElArea);
 		this.add(btnEliminar);
+		this.add(btnSelHospital);
 	}
 }
