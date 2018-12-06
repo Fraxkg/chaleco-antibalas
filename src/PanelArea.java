@@ -126,21 +126,7 @@ public class PanelArea extends JPanel{
 				//inicializo el id del hospital que se agregará a area
 				
 				
-				int comp2;
-				String comp1;
-				//este while de registros obtiene el id del del hospital que seleccione
-				registrosIdHospital=(ResultSet)data.getQuery("SELECT * FROM hospital where nombre= '"+hospitalElegido+"';");
-				try {
-					while(registrosIdHospital.next()) {
-						comp2=registros.getInt("idHospital");
-						idHospital=comp2;
-						
-						
-					}
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			
 				System.out.println(idHospital);
 				
 				/// este ciclo de los registros de area sirve para comprobar que no se repita la misma area en el mismo hospital
@@ -165,7 +151,8 @@ public class PanelArea extends JPanel{
 					System.out.println(idHospital);
 				data.setQuery("INSERT INTO _Area (idArea, nombre, idHospital) VALUES (NULL, '"+area+"','"+idHospital+"');");
 				JOptionPane.showMessageDialog(btnAgregar,"Registro de Area exitoso");
-				
+				cbEdArea.addItem(area);
+				cbElArea.addItem(area);
 			}else {
 				JOptionPane.showMessageDialog(btnAgregar,"Inserte los datos correspondientes");
 		}

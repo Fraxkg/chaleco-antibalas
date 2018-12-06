@@ -1,7 +1,11 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -101,8 +105,8 @@ public class PanelPersonal extends JPanel{
 				cbEliminar.addItem("Seleccione un Personal...");
 				cbEdArea.removeAllItems();
 				cbArea.removeAllItems();
-				cbEdArea.addItem("Seleccione un area...");
-				cbArea.addItem("Seleccione un area...");
+				cbEdArea.addItem("Seleccione un área...");
+				cbArea.addItem("Seleccione un área...");
 				System.out.println(idHospital);
 				ResultSet Concuerda=(ResultSet)data.getQuery("SELECT * FROM Personal where idHospital= '"+idHospital+"';");
 				
@@ -128,6 +132,8 @@ public class PanelPersonal extends JPanel{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+
+				
 			}
 		});
 		posY+=40;		
@@ -180,7 +186,7 @@ public class PanelPersonal extends JPanel{
 		lblFechaNac = new JLabel("Fecha de nacimiento:");
 		lblFechaNac.setBounds(10,posY,230,30);
 		
-		txtFechaNac = new JTextField();
+		txtFechaNac = new JTextField("YYYY-MM-DD");
 		txtFechaNac.setBounds(150,posY,100,30);
 		
 		posY+=40;
@@ -199,7 +205,7 @@ public class PanelPersonal extends JPanel{
 		
 		cbPuesto = new JComboBox<>();
 		cbPuesto.setBounds(170,posY,200,30);
-		cbPuesto.addItem("Seleccioanr puesto --");
+		cbPuesto.addItem("Seleccionar puesto --");
 		
 		posY+=40;
 		
@@ -219,8 +225,94 @@ public class PanelPersonal extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
+				registros=(ResultSet) data.getQuery("Select * from _Area");
+				registrosHospital=(ResultSet) data.getQuery("Select * from Hospital");
+				boolean flagRepetido=false;
+				//guarda el texto insertado en una variable
+				String nombre=txtNombre.getText();
+				String ap=txtAp.getText();
+				String am=txtAm.getText();
+				String direccion=txtDireccion.getText();
+				String telefono=txtTel.getText();
+				String fechaNac=txtFechaNac.getText();
+				String sexo=(String) cbSexo.getSelectedItem();
+				String area=(String)cbArea.getSelectedItem();
+				String puesto=(String)cbPuesto.getSelectedItem();
+				int idSexo=0;
+				int idPuesto=0;
+				int idArea=0;
+				//int =(int) cbSexo.getSelectedItem();
+				//guardo la opcion del hospital elegido en una varibale
+				String hospitalElegido=(String) cbHospital.getSelectedItem();
+				//inicializo el id del hospital que se agregará a area
 				
+				
+			
+				System.out.println(idHospital);
+				
+				/// este ciclo de los registros de area sirve para comprobar que no se repita la misma area en el mismo hospital
+				try {
+					while(registros.next()) {
+						String prueba=registros.getString("nombre");
+						int prueba2=registros.getInt("idHospital");
+						
+						if(nombre.equals(prueba)&&idHospital==prueba2) {
+							
+							flagRepetido=true;
+						}
+						
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ResultSet obtenerSexo=(ResultSet)data.getQuery("SELECT * FROM Sexo where nombre= '"+sexo+"';");
+				
+				try {
+					while(obtenerSexo.next()) {
+						idSexo=obtenerSexo.getInt("idSexo");
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ResultSet obtenerPuesto=(ResultSet)data.getQuery("SELECT * FROM TipoPuesto where puesto= '"+puesto+"';");
+				
+				try {
+					while(obtenerPuesto.next()) {
+						idPuesto=obtenerPuesto.getInt("idTipoPuesto");
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ResultSet obtenerArea=(ResultSet)data.getQuery("SELECT * FROM _Area where nombre= '"+area+"';");
+				
+				try {
+					while(obtenerArea.next()) {
+						idArea=obtenerArea.getInt("idArea");
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				//aqui se valida que si el campo no esta vacio y no esta repetido insertara la informacion moxxita
+				if(txtNombre.getText().isEmpty()!=true && flagRepetido==false) {
+					
+				data.setQuery("INSERT INTO Personal (idPersonal, nombre,apellidoPaterno,apellidoMaterno,direccion,telefono, fechaNacimiento,idSexo,idTipoPuesto,idArea, idHospital)"
+						+ " VALUES (NULL, '"+nombre+"','"+ap+"','"+am+"','"+direccion+"','"+telefono+"','"+fechaNac+"','"+idSexo+"','"+idPuesto+"','"+idArea+"','"+idHospital+"');");
+				JOptionPane.showMessageDialog(btnAgregar,"Registro de Personal exitoso");
+				cbEditar.addItem(nombre);
+				cbEliminar.addItem(nombre);
+				
+			}else {
+				JOptionPane.showMessageDialog(btnAgregar,"Inserte los datos correspondientes");
+		}
+				if(flagRepetido==true) {
+				JOptionPane.showMessageDialog(btnAgregar,"Este personal ya está registrado");}
 			}
+
+			
 		});
 		
 		btnCancelar = new JButton("Cancelar");
@@ -275,7 +367,7 @@ public class PanelPersonal extends JPanel{
 		
 		cbEditar = new JComboBox<>();
 		cbEditar.setBounds(760,posY,200,30);
-		cbEditar.addItem("Seleccionar peronal --");
+		cbEditar.addItem("Seleccionar personal --");
 		
 		btnEditar = new JButton("Editar");
 		btnEditar.setBounds(970,posY,100,30);
@@ -283,7 +375,65 @@ public class PanelPersonal extends JPanel{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				String sexo="";
+				String area="";
+				String puesto="";
+				int idSexo=0;
+				int idPuesto=0;
+				int idArea=0;
+				if(cbEditar.getSelectedIndex()!=0) {
+					
+					nombreViejo=(String) cbEditar.getSelectedItem();
+					
+					txtEdNombre.setText((String) cbEditar.getSelectedItem());
+					ResultSet registrosSeleccionado=(ResultSet)data.getQuery("SELECT * FROM Personal where nombre= '"+nombreViejo+"';");
+					try {
+						while(registrosSeleccionado.next()) {
+							
+							txtEdAp.setText(registrosSeleccionado.getString("apellidoPaterno"));
+							txtEdAm.setText(registrosSeleccionado.getString("apellidoMaterno"));
+							txtEdDireccion.setText(registrosSeleccionado.getString("direccion"));
+							txtEdTel.setText(registrosSeleccionado.getString("telefono"));
+							txtEdFechaNac.setText(registrosSeleccionado.getString("FechaNacimiento"));
+							idSexo=registrosSeleccionado.getInt("idSexo");
+							idPuesto=registrosSeleccionado.getInt("idTipoPuesto");
+							idArea=registrosSeleccionado.getInt("idArea");
+						
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					ResultSet regSexo=(ResultSet)data.getQuery("SELECT * FROM Sexo where idSexo= '"+idSexo+"';");
+					try {
+						while(regSexo.next()) {
+							cbEdSexo.setSelectedItem(regSexo.getString("nombre"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					ResultSet regPuesto=(ResultSet)data.getQuery("SELECT * FROM TipoPuesto where idTipoPuesto= '"+idPuesto+"';");
+					try {
+						while(regPuesto.next()) {
+							cbEdPuesto.setSelectedItem(regPuesto.getString("puesto"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					ResultSet regArea=(ResultSet)data.getQuery("SELECT * FROM _Area where idArea= '"+idArea+"';");
+					try {
+						while(regArea.next()) {
+							cbEdArea.setSelectedItem(regArea.getString("nombre"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					}else {
+						
+					}
 				
 			}
 		});
@@ -333,7 +483,7 @@ public class PanelPersonal extends JPanel{
 		lblEdFechaNac = new JLabel("Fecha de nacimiento:");
 		lblEdFechaNac.setBounds(610,posY,230,30);
 		
-		txtEdFechaNac = new JTextField();
+		txtEdFechaNac = new JTextField("YYYY-MM-DD");
 		txtEdFechaNac.setBounds(750,posY,100,30);
 		
 		posY+=40;
@@ -372,7 +522,81 @@ public class PanelPersonal extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				int idSexo=0;
+				int idPuesto=0;
+				int idArea=0;
+				String nombreNuevo=txtEdNombre.getText();
+				String apNuevo=txtEdAp.getText();
+				String amNuevo=txtEdAm.getText();
+				String direccionNuevo=txtEdDireccion.getText();
+				String telefonoNuevo=txtEdTel.getText();
+				String fechaNacNuevo=txtEdFechaNac.getText();
+				String areaNuevo=(String) cbEdArea.getSelectedItem();
+				String PuestoNuevo=(String) cbEdPuesto.getSelectedItem();
+				String SexoNuevo=(String) cbEdSexo.getSelectedItem();
+				System.out.println(nombreNuevo);
 				
+				ResultSet regSexo=(ResultSet) data.getQuery("select *from Sexo where nombre='"+SexoNuevo+"';");
+				try {
+					while(regSexo.next()) {
+						idSexo=regSexo.getInt("idSexo");
+					}
+				} catch (SQLException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				
+				ResultSet regPuesto=(ResultSet) data.getQuery("select *from TipoPuesto where puesto='"+PuestoNuevo+"';");
+				try {
+					while(regPuesto.next()) {
+						idPuesto=regPuesto.getInt("idTipoPuesto");
+					}
+				} catch (SQLException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				ResultSet regArea=(ResultSet) data.getQuery("select *from _Area where nombre='"+areaNuevo+"';");
+				try {
+					while(regArea.next()) {
+						idArea=regArea.getInt("idArea");
+					}
+				} catch (SQLException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				if(cbEditar.getSelectedIndex()!=0) {
+					data.setQuery("UPDATE Personal SET nombre = '"+nombreNuevo+"',apellidoPaterno ='"+apNuevo+"',apellidoMaterno='"+amNuevo+"', direccion='"+direccionNuevo+"',telefono='"+telefonoNuevo+"', fechaNacimiento='"+fechaNacNuevo+"',idSexo='"+idSexo+"',idTipoPuesto='"+idPuesto+"',idArea='"+idArea+"' WHERE nombre='"+nombreViejo+"'");
+					
+					txtEdNombre.setText("");
+					txtEdAp.setText("");
+					txtEdAm.setText("");
+					txtEdDireccion.setText("");
+					txtEdTel.setText("");
+					txtEdFechaNac.setText("");
+					cbEdArea.setSelectedIndex(0);
+					cbEdPuesto.setSelectedIndex(0);
+					cbEdSexo.setSelectedIndex(0);
+					
+					JOptionPane.showMessageDialog(btnGuardarEdicion,"Edición exitosa");
+					cbEliminar.removeAllItems();
+					cbEditar.removeAllItems();
+					cbEliminar.addItem("Seleccione Personal...");
+					cbEditar.addItem("Seleccione Personal...");
+					ResultSet registrosArea=(ResultSet)data.getQuery("SELECT * FROM Personal where idHospital= '"+idHospital+"';");
+					
+					try {
+						while(registrosArea.next()) {
+							
+							cbEliminar.addItem(registrosArea.getString("nombre"));
+							cbEditar.addItem(registrosArea.getString("nombre"));
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					}else {
+						
+					}
 			}
 		});
 		
