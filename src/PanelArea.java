@@ -36,7 +36,7 @@ public class PanelArea extends JPanel{
 		data= new MySQLConnect();
 		data.MySQLConnect();
 		registrosHospital=(ResultSet) data.getQuery("Select * from Hospital");
-		registros=(ResultSet) data.getQuery("Select * from _Area");
+		registros=(ResultSet) data.getQuery("Select * from Farmacia");
 		
 		lblSelectHospital = new JLabel("Seleccionar hospital:");
 		lblSelectHospital.setBounds(10,posY,150,30);

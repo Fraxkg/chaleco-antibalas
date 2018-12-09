@@ -564,7 +564,7 @@ public class PanelPersonal extends JPanel{
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
-				if(cbEditar.getSelectedIndex()!=0) {
+				if(cbEditar.getSelectedIndex()!=0) {  
 					data.setQuery("UPDATE Personal SET nombre = '"+nombreNuevo+"',apellidoPaterno ='"+apNuevo+"',apellidoMaterno='"+amNuevo+"', direccion='"+direccionNuevo+"',telefono='"+telefonoNuevo+"', fechaNacimiento='"+fechaNacNuevo+"',idSexo='"+idSexo+"',idTipoPuesto='"+idPuesto+"',idArea='"+idArea+"' WHERE nombre='"+nombreViejo+"'");
 					
 					txtEdNombre.setText("");

@@ -1,3 +1,5 @@
+import java.awt.Color;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -42,6 +44,20 @@ public class Ventana extends JFrame{
 		panelInternado = new PanelInternado();
 		panelCita = new PanelCita();
 		panelReceta = new PanelReceta();
+		
+		panelHospital.setBackground(Color.LIGHT_GRAY);
+		panelPersonal.setBackground(Color.LIGHT_GRAY);
+		panelArea.setBackground(Color.LIGHT_GRAY);
+		panelPuesto.setBackground(Color.LIGHT_GRAY);
+		panelPaciente.setBackground(Color.LIGHT_GRAY);
+		panelCama.setBackground(Color.LIGHT_GRAY);
+		panelFarmacia.setBackground(Color.LIGHT_GRAY);
+		panelMedicamento.setBackground(Color.LIGHT_GRAY);
+		panelInternado.setBackground(Color.LIGHT_GRAY);
+		panelCita.setBackground(Color.LIGHT_GRAY);
+		panelReceta.setBackground(Color.LIGHT_GRAY);
+		
+		
 		
 		panelTabbe.addTab("Admin Hospital", panelHospital);
 		panelTabbe.addTab("Personal", panelPersonal);
